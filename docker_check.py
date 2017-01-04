@@ -21,16 +21,44 @@ drunk_leakey        0.12%               13.19 MB / 6.15 GB   0.21%              
 
 '''
 
+
+client=docker.from_env(version="1.21") #try except the version based on docker version | grep "server api"
+ls=client.containers.list()
+ct=[]
+for i in ls:
+	ct.append(str(i).replace('<','').replace('>','').split()[1])
+
+def get_mem_pct(ct):
+	mem=client.containers.get(ct).stats(stream=False)['memory_stats']
+	usage=mem['usage']
+	limit=mem['limit']
+	return round(usage*100/limit,2)
+	
+def get_cpu_pct(ct):
+	cpu=client.containers.get(ct).stats(stream=False)['precpu_stats']
+	usage=cpu['system_cpu_usage']
+	#limit=mem['limit']
+	return usage/(4*usage**2) #cpu #round(usage*100/limit,2)
+
+
+
+
 def main():
-	client=docker.from_env(version="1.21") #try except the version based on docker version | grep "server api"
-	ls=client.containers.list()
-	ct=[]
-	for i in ls:
-		ct.append(str(i).replace('<','').replace('>','').split()[1])
+	#print(str(sys.argv))
+#	arg=sys.argv[1]
+	#print(arg)
+##	client=docker.from_env(version="1.21") #try except the version based on docker version | grep "server api"
+##	ls=client.containers.list()
+##	ct=[]
+##	for i in ls:
+##		ct.append(str(i).replace('<','').replace('>','').split()[1])
 	#cl=client.containers.get("3f106f3328")
 	for i in ct:
-		print(client.containers.get(i).stats(stream=False)['networks'])
-
+		#print(client.containers.get(i).stats(stream=False)[arg])
+		print('{} → {}'.format(i, get_mem_pct(i)))
+		print('{} → {}'.format(i, get_cpu_pct(i)))
+#		for j,k in client.containers.get(i).stats(stream=False).items():
+#			print(j)
 
 '''
 used_space=os.popen("df -h / | grep -v Filesystem | awk '{print $5}'").readline().strip()
