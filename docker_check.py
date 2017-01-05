@@ -46,7 +46,17 @@ def get_cpu_pct(ct):
 	usage_pct=usage[usage.index(ct)+1]
 	return usage_pct[:-1]
 
+def get_net_io(ct):
+	net=client.containers.get(ct).stats(stream=False)['networks']
+	net_in=net['eth0']['rx_bytes']
+	net_out=net['eth0']['tx_bytes']
+	return net_in,net_out
 
+def get_disk_io(ct):
+	disk=client.containers.get(ct).stats(stream=False)['blkio_stats']['io_service_bytes_recursive']
+	disk_in=disk[0]['value']
+	disk_out=disk[1]['value']
+	return disk_in,disk_out
 
 
 def main():
@@ -63,6 +73,8 @@ def main():
 		#print(client.containers.get(i).stats(stream=False)[arg])
 		print('{} → {}'.format(i, get_mem_pct(i)))
 		print('{} → {}'.format(i, get_cpu_pct(i)))
+		print('{} → {}'.format(i, get_net_io(i)))
+		print('{} → {}'.format(i, get_disk_io(i)))
 #		for j,k in client.containers.get(i).stats(stream=False).items():
 #			print(j)
 
