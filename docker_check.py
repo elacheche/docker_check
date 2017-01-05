@@ -35,10 +35,16 @@ def get_mem_pct(ct):
 	return round(usage*100/limit,2)
 	
 def get_cpu_pct(ct):
-	cpu=client.containers.get(ct).stats(stream=False)['precpu_stats']
-	usage=cpu['system_cpu_usage']
-	#limit=mem['limit']
-	return usage/(4*usage**2) #cpu #round(usage*100/limit,2)
+	#cpu=client.containers.get(ct).stats(stream=False)['precpu_stats']
+	#usage=cpu['system_cpu_usage']
+	# ToDo:
+	# Use API instead of docker stats
+	# (new-docker-usage - old-docker-usage) / (new-system-cpu-usage - old-cpu-usage) * 100
+	# with spreding that on CPU CORE numbers
+	# should find a way to keep ODU & OCU values : OS STATS LOGS or usa a tmp file
+	usage=str(os.popen("docker stats --no-stream=true "+ct).read()).split()
+	usage_pct=usage[usage.index(ct)+1]
+	return usage_pct[:-1]
 
 
 
