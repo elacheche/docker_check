@@ -62,6 +62,7 @@ def get_disk_io(ct):
 def main():
 	summary = ''
 	stats = {}
+	metrics = [0,0]
 	for i in ct:
 		mem_pct = get_mem_pct(i)
 		cpu_pct = get_cpu_pct(i)
@@ -72,23 +73,23 @@ def main():
 		stats[i+'_mem_pct'] = mem_pct
 		stats[i+'_cpu_pct'] = cpu_pct
 		summary += '{}_mem_pct={}% {}_cpu_pct={}% {}_net_in={} {}_net_out={} {}_disk_in={} {}_disk_out={} '.format(i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i, disk_in, i, disk_out)
-	print(stats)
-'''
-used_space=os.popen("df -h / | grep -v Filesystem | awk '{print $5}'").readline().strip()
+	for s in stats:
+		if stats[s] >= metrics[1]:
+			metrics[0] = s
+			metrics[1] = stats[s]
+	if metrics[1] < 50:
+        	print("OK | {}".format(summary))
+	        sys.exit(0)
+	elif 50 <= metrics[1] <= 80:
+        	print("WARNING: Some containers need your attention: {} have {}% | {}".format(metrics[0], metrics[1], summary))
+	        sys.exit(1)
+	elif metrics[1] > 80:
+	        print("CRITICAL: Some containers need your attention: {} have {}% | {}".format(metrics[0], metrics[1], summary))
+	        sys.exit(2)
+	else:
+        	print("UKNOWN | {}".format(summary))
+	        sys.exit(3)
 
-if used_space < "85%":
-        print("OK - {} of disk space used.".format(used_space))
-        sys.exit(0)
-elif used_space == "85%":
-        print("WARNING - {} of disk space used.".format(used_space))
-        sys.exit(1)
-elif used_space > "85%":
-        print("CRITICAL - {} of disk space used.".format(used_space))
-        sys.exit(2)
-else:
-        print("UKNOWN - {} of disk space used.".format(used_space))
-        sys.exit(3)
-'''
 if __name__ == '__main__':
 	## Initialize logging before hitting main, in case we need extra debuggability
 	#log.basicConfig(level=log.DEBUG, format='%(asctime)s - %(funcName)s - %(levelname)s - %(message)s')
