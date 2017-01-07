@@ -2,15 +2,10 @@
 import sys
 import os
 import docker
-import json
-import logging
 
-logger = logging.getLogger()
-__author__ = ''
-__copyright__ = ''
-__credits__ = ['']
-__license__ = ''
-__version__ = ''
+__author__ = 'El Acheche Anis'
+__license__ = 'GPL'
+__version__ = '0.1'
 
 '''
 Requires Python 3
