@@ -48,6 +48,8 @@ def get_disk_io(ct, stats):
 
 
 def main():
+    client = docker.from_env(version="1.21")
+    # try except the version based on docker version | grep "server api"
     ls = client.containers.list()
     ct = []
 
@@ -94,6 +96,4 @@ def main():
             sys.exit(3)
 
 if __name__ == '__main__':
-    client = docker.from_env(version="1.21")
-    # try except the version based on docker version | grep "server api"
     main()
