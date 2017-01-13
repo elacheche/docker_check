@@ -13,16 +13,8 @@ Requires Python 3
 '''
 
 
-client = docker.from_env(version="1.21")
-# try except the version based on docker version | grep "server api"
-ls = client.containers.list()
-ct = []
-for i in ls:
-    ct.append(str(i).replace('<', '').replace('>', '').split()[1])
-
-
-def get_mem_pct(ct):
-    mem = client.containers.get(ct).stats(stream=False)['memory_stats']
+def get_mem_pct(ct, stats):
+    mem = stats[ct]['memory_stats']
     usage = mem['usage']
     limit = mem['limit']
     return round(usage*100/limit, 2)
@@ -41,33 +33,39 @@ def get_cpu_pct(ct):
     return float(usage_pct[:-1])
 
 
-def get_net_io(ct):
-    net = client.containers.get(ct).stats(stream=False)['networks']
+def get_net_io(ct, stats):
+    net =  stats[ct]['networks']
     net_in = net['eth0']['rx_bytes']
     net_out = net['eth0']['tx_bytes']
     return [net_in, net_out]
 
 
-def get_disk_io(ct):
-    disk = client.containers.get(ct).stats(stream=False)
-    disk_stat = disk['blkio_stats']['io_service_bytes_recursive']
-    disk_in = disk_stat[0]['value']
-    disk_out = disk_stat[1]['value']
+def get_disk_io(ct, stats):
+    disk = stats[ct]['blkio_stats']['io_service_bytes_recursive']
+    disk_in = disk[0]['value']
+    disk_out = disk[1]['value']
     return disk_in, disk_out
 
 
 def main():
+    ls = client.containers.list()
+    ct = []
+
+    for i in ls:
+        ct.append(str(i).replace('<', '').replace('>', '').split()[1])
+
     summary = ''
     stats = {}
     metrics = [0, 0]
-
+    ct_stats = {}
     for i in ct:
-        mem_pct = get_mem_pct(i)
+        ct_stats[i] = client.containers.get(i).stats(stream=False)
+        mem_pct = get_mem_pct(i, ct_stats)
         cpu_pct = get_cpu_pct(i)
-        net_in = get_net_io(i)[0]
-        net_out = get_net_io(i)[1]
-        disk_in = get_disk_io(i)[0]
-        disk_out = get_disk_io(i)[1]
+        net_in = get_net_io(i, ct_stats)[0]
+        net_out = get_net_io(i, ct_stats)[1]
+        disk_in = get_disk_io(i, ct_stats)[0]
+        disk_out = get_disk_io(i, ct_stats)[1]
         stats[i+'_mem_pct'] = mem_pct
         stats[i+'_cpu_pct'] = cpu_pct
         summary += '{}_mem_pct={}% {}_cpu_pct={}% {}_net_in={} {}_net_out={} '\
@@ -96,4 +94,6 @@ def main():
             sys.exit(3)
 
 if __name__ == '__main__':
+    client = docker.from_env(version="1.21")
+    # try except the version based on docker version | grep "server api"
     main()
