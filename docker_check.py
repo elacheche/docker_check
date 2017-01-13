@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-import sys
-import os
 import docker
+import os
+import re
+import sys
 
 __author__ = 'El Acheche Anis'
 __license__ = 'GPL'
@@ -34,7 +35,7 @@ def get_cpu_pct(ct):
 
 
 def get_net_io(ct, stats):
-    net =  stats[ct]['networks']
+    net = stats[ct]['networks']
     net_in = net['eth0']['rx_bytes']
     net_out = net['eth0']['tx_bytes']
     return [net_in, net_out]
@@ -48,8 +49,13 @@ def get_disk_io(ct, stats):
 
 
 def main():
-    client = docker.from_env(version="1.21")
-    # try except the version based on docker version | grep "server api"
+    try:
+        docker.from_env().containers.list()
+        client = docker.from_env()
+    except docker.errors.APIError as e:
+        v = re.sub('[^0-9.]+', '', str(e).split('server API version:')[1])
+        client = docker.from_env(version=v)
+
     ls = client.containers.list()
     ct = []
 
