@@ -8,13 +8,9 @@ __author__ = 'El Acheche Anis'
 __license__ = 'GPL'
 __version__ = '0.1'
 
-'''
-Requires Python 3
-
-'''
-
 
 def get_mem_pct(ct, stats):
+    '''Get a container memory usage in %'''
     mem = stats[ct]['memory_stats']
     usage = mem['usage']
     limit = mem['limit']
@@ -22,19 +18,14 @@ def get_mem_pct(ct, stats):
 
 
 def get_cpu_pct(ct):
-    # cpu=client.containers.get(ct).stats(stream=False)['precpu_stats']
-    # usage=cpu['system_cpu_usage']
-    # ToDo:
-    # Use API instead of docker stats
-    # (new_dock_usage - old_dock_usage)/(new_sys_cpu_use-old_cpu_usage)*100
-    # with spreding that on CPU CORE numbers
-    # should find way to keep old & current values:OS STATS LOGS or a tmp file
+    '''Get a container cpu usage in % via docker stats cmd'''
     usage = str(os.popen("docker stats --no-stream=true "+ct).read()).split()
     usage_pct = usage[usage.index(ct)+1]
     return float(usage_pct[:-1])
 
 
 def get_net_io(ct, stats):
+    '''Get a container Net In / Out usage since it's launche'''
     net = stats[ct]['networks']
     net_in = net['eth0']['rx_bytes']
     net_out = net['eth0']['tx_bytes']
@@ -42,6 +33,7 @@ def get_net_io(ct, stats):
 
 
 def get_disk_io(ct, stats):
+    '''Get a container Disk In / Out usage since it's launche'''
     disk = stats[ct]['blkio_stats']['io_service_bytes_recursive']
     disk_in = disk[0]['value']
     disk_out = disk[1]['value']
@@ -49,19 +41,21 @@ def get_disk_io(ct, stats):
 
 
 def main():
+    '''Try to use the lastest API version otherwise use
+    the installed client API version
+    '''
     try:
         docker.from_env().containers.list()
         client = docker.from_env()
     except docker.errors.APIError as e:
         v = re.sub('[^0-9.]+', '', str(e).split('server API version:')[1])
         client = docker.from_env(version=v)
-
+    '''Get list of running containers'''
     ls = client.containers.list()
     ct = []
-
     for i in ls:
         ct.append(str(i).replace('<', '').replace('>', '').split()[1])
-
+    '''Get stats and metrics'''
     summary = ''
     stats = {}
     metrics = [0, 0]
@@ -80,12 +74,12 @@ def main():
                    '{}_disk_in={} {}_disk_out={} '.format(
                     i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i, disk_in,
                     i, disk_out)
-
+    '''Get the highest % use'''
     for s in stats:
         if stats[s] >= metrics[1]:
             metrics[0] = s
             metrics[1] = stats[s]
-
+    '''Check stats values and output perfdata'''
     if metrics[1] < 50:
             print("OK | {}".format(summary))
             sys.exit(0)
