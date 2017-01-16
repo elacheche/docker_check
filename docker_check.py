@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-import docker
 import os
 import re
 import sys
-
+try:
+	import docker
+except ImportError as e:
+	print("{}: Please install the docker module, you can use 'pip install docker' to do that".format(e))
+	sys.exit(1)
+	
 __author__ = 'El Acheche Anis'
 __license__ = 'GPL'
 __version__ = '0.1'
