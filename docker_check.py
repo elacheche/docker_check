@@ -3,11 +3,12 @@ import os
 import re
 import sys
 try:
-	import docker
+    import docker
 except ImportError as e:
-	print("{}: Please install the docker module, you can use 'pip install docker' to do that".format(e))
-	sys.exit(1)
-	
+    print("{}: Please install the docker module, you can use' \
+          ''pip install docker' to do that".format(e))
+    sys.exit(1)
+
 __author__ = 'El Acheche Anis'
 __license__ = 'GPL'
 __version__ = '0.1'
@@ -57,8 +58,14 @@ def main():
     '''Get list of running containers'''
     ls = client.containers.list()
     ct = []
+    '''If cid is True containers IDs will be used, otherwise names'''
+    cid = False
     for i in ls:
-        ct.append(str(i).replace('<', '').replace('>', '').split()[1])
+        c = str(i).replace('<', '').replace('>', '').split()[1]
+        if cid:
+            ct.append(c)
+        else:
+            ct.append(os.popen("docker ps -f id="+c).read().split()[-1])
     '''Get stats and metrics'''
     summary = ''
     stats = {}
@@ -88,8 +95,8 @@ def main():
             print("OK | {}".format(summary))
             sys.exit(0)
     elif 50 <= metrics[1] <= 80:
-            print("WARNING: Some containers need your attention: {} have {}% '\
-                    | {}".format(metrics[0], metrics[1], summary))
+            print("WARNING: Some containers need your attention: {} have {}%'\
+                    ' | {}".format(metrics[0], metrics[1], summary))
             sys.exit(1)
     elif metrics[1] > 80:
             print("CRITICAL: Some containers need your attention: {} have {}%'\
