@@ -69,7 +69,13 @@ service icinga2 restart
 Otherwise fix the issues.
 
 # Preview:
-This is a preview of the results I got with some testing containers, Icinga2 get checks from the script, Graphite get the data from Icinga then Grafana visualise them via Graphite.
+## Script output:
+The script output should be similar to this:
+```
+OK | furious_ritchie_mem_pct=0.02% furious_ritchie_cpu_pct=0.0% furious_ritchie_net_in=91137 furious_ritchie_net_out=648 furious_ritchie_disk_in=1003520 furious_ritchie_disk_out=0 elated_booth_mem_pct=1.53% elated_booth_cpu_pct=1.73% elated_booth_net_in=556163 elated_booth_net_out=30239 elated_booth_disk_in=4423680 elated_booth_disk_out=58605568 
+```
+## Grafana:
+This is a preview of the results I got with some testing containers (not the ones from the previous output), Icinga2 get checks from the script, Graphite get the data from Icinga then Grafana visualise them via Graphite.
 
-[![Status from Grafana](http://i.imgur.com/bxjcGJ1.png)]
+![Status from Grafana](http://i.imgur.com/bxjcGJ1.png)
 
