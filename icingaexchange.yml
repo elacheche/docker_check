@@ -1,7 +1,7 @@
 name: Docker containers check
 description: "file:///README.md"
 url: "https://github.com/elacheche/docker_check"
-tags: Statistic, Contiainer, Icinga2, Nagios
+tags: Statistic, Contiainer, Icinga2, Nagios, Docker
 vendor: Linux
 target: Docker
 type: Plugin
