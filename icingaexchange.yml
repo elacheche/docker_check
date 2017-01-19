@@ -1,0 +1,18 @@
+name: Docker containers check
+description: "file:///README.md"
+url: "https://github.com/elacheche/docker_check"
+tags: Statistic Contianer
+vendor: Linux
+target: Docker
+type: Plugin
+license: gpl
+releases: 
+  -
+   name: 1.0
+   description: "1.0 Release"
+   files: 
+     - 
+       name: docker_check.py
+       url: "file:///docker_check.py"
+       description: "First release"
+       checksum: c9c697f8d628c4d2e96047b61b8ac346
