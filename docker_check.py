@@ -45,6 +45,10 @@ def get_disk_io(ct, stats):
     return disk_in, disk_out
 
 
+def get_ct_stats(ct, client):
+    return client.containers.get(ct).stats(stream=False)
+
+
 def main():
     '''Try to use the lastest API version otherwise use
     the installed client API version
@@ -55,10 +59,10 @@ def main():
     except docker.errors.APIError as e:
         v = re.sub('[^0-9.]+', '', str(e).split('server API version:')[1])
         client = docker.from_env(version=v)
-    '''Get list of running containers'''
+    # Get list of running containers
     ls = client.containers.list()
     ct = []
-    '''If cid is True containers IDs will be used, otherwise names'''
+    # If cid is True containers IDs will be used, otherwise names
     cid = False
     for i in ls:
         c = str(i).replace('<', '').replace('>', '').split()[1]
@@ -66,13 +70,13 @@ def main():
             ct.append(c)
         else:
             ct.append(os.popen("docker ps -f id="+c).read().split()[-1])
-    '''Get stats and metrics'''
+    # Get stats and metrics
     summary = ''
     stats = {}
     metrics = [0, 0]
     ct_stats = {}
     for i in ct:
-        ct_stats[i] = client.containers.get(i).stats(stream=False)
+        ct_stats[i] = get_ct_stats(i, client)
         mem_pct = get_mem_pct(i, ct_stats)
         cpu_pct = get_cpu_pct(i)
         net_in = get_net_io(i, ct_stats)[0]
@@ -85,12 +89,12 @@ def main():
                    '{}_disk_in={} {}_disk_out={} '.format(
                     i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i, disk_in,
                     i, disk_out)
-    '''Get the highest % use'''
+    # Get the highest % use
     for s in stats:
         if stats[s] >= metrics[1]:
             metrics[0] = s
             metrics[1] = stats[s]
-    '''Check stats values and output perfdata'''
+    # Check stats values and output perfdata
     if metrics[1] < 50:
             print("OK | {}".format(summary))
             sys.exit(0)
