@@ -16,6 +16,11 @@ curl https://raw.githubusercontent.com/elacheche/docker_check/master/docker_chec
 chmod +x /usr/lib/nagios/plugins/docker_check.py
 ```
 
+## Add nagios user to docker group:
+```
+sudo usermod -a -G docker nagios
+```
+
 ## Configure the monitoring server:
 In this section I'll illustrete how to setup the script to be used by [Icinga2](https://www.icinga.com/products/icinga-2/) via the *by_ssh* plugin..
 Icinga2 is a Nagios fork, so the plugin is supposed to work with any Nagios fork, the sconfig files and syntax may change from a frok to an other
