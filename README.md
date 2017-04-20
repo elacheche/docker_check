@@ -4,9 +4,9 @@
 # Installation & Usage:
 The current version don't need any arguments to be used all you need to do is:
 
-## Install the Python library for the Docker Engine API:
+## Install the Python3 library for the Docker Engine API:
 ```
-pip install docker
+pip3 install docker
 ```
 Please check this [link](https://github.com/docker/docker-py) To get more information about this lib please check
 
