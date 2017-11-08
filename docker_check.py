@@ -2,6 +2,8 @@
 import os
 import re
 import sys
+import argparse
+
 try:
     import docker
 except ImportError as e:
@@ -50,6 +52,11 @@ def get_ct_stats(ct, client):
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Check docker processes.')
+    parser.add_argument('-w', '--warning', type=int, help='warning percentage (default 50)', default=50)
+    parser.add_argument('-c', '--critical', type=int, help='critcal percentage (default 80)', default=80)
+    args = parser.parse_args()
+
     '''Try to use the lastest API version otherwise use
     the installed client API version
     '''
@@ -95,10 +102,10 @@ def main():
             metrics[0] = s
             metrics[1] = stats[s]
     # Check stats values and output perfdata
-    if metrics[1] < 50:
+    if metrics[1] < args.warning:
             print("OK | {}".format(summary))
             sys.exit(0)
-    elif 50 <= metrics[1] <= 80:
+    elif args.warning <= metrics[1] <= args.critical:
             print("WARNING: Some containers need your attention: {} have {}%'\
                     ' | {}".format(metrics[0], metrics[1], summary))
             sys.exit(1)
