@@ -21,13 +21,13 @@ def get_mem_pct(ct, stats):
     mem = stats[ct]['memory_stats']
     usage = mem['usage']
     limit = mem['limit']
-    return round(usage*100/limit, 2)
+    return round(usage * 100 / limit, 2)
 
 
 def get_cpu_pct(ct):
     '''Get a container cpu usage in % via docker stats cmd'''
-    usage = str(os.popen("docker stats --no-stream=true "+ct).read()).split()
-    usage_pct = usage[usage.index(ct)+1]
+    usage = str(os.popen("docker stats --no-stream=true " + ct).read()).split()
+    usage_pct = usage[usage.index(ct) + 1]
     return float(usage_pct[:-1])
 
 
@@ -53,8 +53,10 @@ def get_ct_stats(ct, client):
 
 def main():
     parser = argparse.ArgumentParser(description='Check docker processes.')
-    parser.add_argument('-w', '--warning', type=int, help='warning percentage (default 50)', default=50)
-    parser.add_argument('-c', '--critical', type=int, help='critcal percentage (default 80)', default=80)
+    parser.add_argument('-w', '--warning', type=int,
+                        help='warning percentage (default 50)', default=50)
+    parser.add_argument('-c', '--critical', type=int,
+                        help='critcal percentage (default 80)', default=80)
     args = parser.parse_args()
 
     '''Try to use the lastest API version otherwise use
@@ -76,7 +78,7 @@ def main():
         if cid:
             ct.append(c)
         else:
-            ct.append(os.popen("docker ps -f id="+c).read().split()[-1])
+            ct.append(os.popen("docker ps -f id=" + c).read().split()[-1])
     # Get stats and metrics
     summary = ''
     stats = {}
@@ -90,12 +92,12 @@ def main():
         net_out = get_net_io(i, ct_stats)[1]
         disk_in = get_disk_io(i, ct_stats)[0]
         disk_out = get_disk_io(i, ct_stats)[1]
-        stats[i+'_mem_pct'] = mem_pct
-        stats[i+'_cpu_pct'] = cpu_pct
+        stats[i + '_mem_pct'] = mem_pct
+        stats[i + '_cpu_pct'] = cpu_pct
         summary += '{}_mem_pct={}% {}_cpu_pct={}% {}_net_in={} {}_net_out={} '\
                    '{}_disk_in={} {}_disk_out={} '.format(
-                    i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i, disk_in,
-                    i, disk_out)
+                       i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i,
+                       disk_in, i, disk_out)
     # Get the highest % use
     for s in stats:
         if stats[s] >= metrics[1]:
@@ -103,19 +105,20 @@ def main():
             metrics[1] = stats[s]
     # Check stats values and output perfdata
     if metrics[1] < args.warning:
-            print("OK | {}".format(summary))
-            sys.exit(0)
+        print("OK | {}".format(summary))
+        sys.exit(0)
     elif args.warning <= metrics[1] <= args.critical:
-            print("WARNING: Some containers need your attention: {} have {}%'\
+        print("WARNING: Some containers need your attention: {} have {}%'\
                     ' | {}".format(metrics[0], metrics[1], summary))
-            sys.exit(1)
+        sys.exit(1)
     elif metrics[1] > 80:
-            print("CRITICAL: Some containers need your attention: {} have {}%'\
+        print("CRITICAL: Some containers need your attention: {} have {}%'\
                     ' | {}".format(metrics[0], metrics[1], summary))
-            sys.exit(2)
+        sys.exit(2)
     else:
-            print("UKNOWN | {}".format(summary))
-            sys.exit(3)
+        print("UKNOWN | {}".format(summary))
+        sys.exit(3)
+
 
 if __name__ == '__main__':
     main()
