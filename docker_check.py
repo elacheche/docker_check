@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+"docker_check.py is a nagios compatible plugin to check docker containers."
+
 import os
 import re
 import sys
@@ -6,9 +9,9 @@ import argparse
 
 try:
     import docker
-except ImportError as e:
+except ImportError as error:
     print("{}: Please install the docker module, you can use' \
-          ''pip install docker' to do that".format(e))
+          ''pip install docker' to do that".format(error))
     sys.exit(1)
 
 __author__ = 'El Acheche Anis'
@@ -16,42 +19,46 @@ __license__ = 'GPL'
 __version__ = '0.1'
 
 
-def get_mem_pct(ct, stats):
+def get_mem_pct(container, stats):
     '''Get a container memory usage in %'''
-    mem = stats[ct]['memory_stats']
+    mem = stats[container]['memory_stats']
     usage = mem['usage']
     limit = mem['limit']
     return round(usage * 100 / limit, 2)
 
 
-def get_cpu_pct(ct):
+def get_cpu_pct(container):
     '''Get a container cpu usage in % via docker stats cmd'''
-    usage = str(os.popen("docker stats --no-stream=true " + ct).read()).split()
-    usage_pct = usage[usage.index(ct) + 1]
+    usage = str(
+        os.popen("docker stats --no-stream=true " + container).read()
+    ).split()
+    usage_pct = usage[usage.index(container) + 1]
     return float(usage_pct[:-1])
 
 
-def get_net_io(ct, stats):
+def get_net_io(container, stats):
     '''Get a container Net In / Out usage since it's launche'''
-    net = stats[ct]['networks']
+    net = stats[container]['networks']
     net_in = net['eth0']['rx_bytes']
     net_out = net['eth0']['tx_bytes']
     return [net_in, net_out]
 
 
-def get_disk_io(ct, stats):
+def get_disk_io(container, stats):
     '''Get a container Disk In / Out usage since it's launche'''
-    disk = stats[ct]['blkio_stats']['io_service_bytes_recursive']
+    disk = stats[container]['blkio_stats']['io_service_bytes_recursive']
     disk_in = disk[0]['value']
     disk_out = disk[1]['value']
     return disk_in, disk_out
 
 
-def get_ct_stats(ct, client):
-    return client.containers.get(ct).stats(stream=False)
+def get_ct_stats(container, client):
+    '''Get container status'''
+    return client.containers.get(container).stats(stream=False)
 
 
 def main():
+    '''Scripts main function'''
     parser = argparse.ArgumentParser(description='Check docker processes.')
     parser.add_argument('-w', '--warning', type=int,
                         help='warning percentage (default 50)', default=50)
@@ -59,32 +66,33 @@ def main():
                         help='critcal percentage (default 80)', default=80)
     args = parser.parse_args()
 
-    '''Try to use the lastest API version otherwise use
-    the installed client API version
-    '''
+    # Try to use the lastest API version otherwise use
+    # the installed client API version
     try:
         docker.from_env().containers.list()
         client = docker.from_env()
-    except docker.errors.APIError as e:
-        v = re.sub('[^0-9.]+', '', str(e).split('server API version:')[1])
-        client = docker.from_env(version=v)
+    except docker.errors.APIError as error:
+        version = re.sub('[^0-9.]+', '',
+                         str(error).split('server API version:')[1])
+        client = docker.from_env(version=version)
     # Get list of running containers
-    ls = client.containers.list()
-    ct = []
+    containers_list = client.containers.list()
+    containers = []
     # If cid is True containers IDs will be used, otherwise names
     cid = False
-    for i in ls:
-        c = str(i).replace('<', '').replace('>', '').split()[1]
+    for i in containers_list:
+        cid = str(i).replace('<', '').replace('>', '').split()[1]
         if cid:
-            ct.append(c)
+            containers.append(cid)
         else:
-            ct.append(os.popen("docker ps -f id=" + c).read().split()[-1])
+            containers.append(
+                os.popen("docker ps -f id=" + cid).read().split()[-1])
     # Get stats and metrics
     summary = ''
     stats = {}
     metrics = [0, 0]
     ct_stats = {}
-    for i in ct:
+    for i in containers:
         ct_stats[i] = get_ct_stats(i, client)
         mem_pct = get_mem_pct(i, ct_stats)
         cpu_pct = get_cpu_pct(i)
@@ -99,10 +107,10 @@ def main():
                        i, mem_pct, i, cpu_pct, i, net_in, i, net_out, i,
                        disk_in, i, disk_out)
     # Get the highest % use
-    for s in stats:
-        if stats[s] >= metrics[1]:
-            metrics[0] = s
-            metrics[1] = stats[s]
+    for stat in stats:
+        if stats[stat] >= metrics[1]:
+            metrics[0] = stat
+            metrics[1] = stats[stat]
     # Check stats values and output perfdata
     if metrics[1] < args.warning:
         print("OK | {}".format(summary))
