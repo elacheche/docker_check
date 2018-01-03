@@ -47,8 +47,14 @@ def get_net_io(container, stats):
 def get_disk_io(container, stats):
     '''Get a container Disk In / Out usage since it's launche'''
     disk = stats[container]['blkio_stats']['io_service_bytes_recursive']
-    disk_in = disk[0]['value']
-    disk_out = disk[1]['value']
+    try:
+        disk_in = disk[0]['value']
+    except IndexError:
+        disk_in = 0
+    try:
+        disk_out = disk[1]['value']
+    except IndexError:
+        disk_out = 0
     return disk_in, disk_out
 
 
