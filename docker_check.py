@@ -197,6 +197,8 @@ def main():
 if __name__ == '__main__':
     try:
         main()
+    except SystemExit:
+        pass
     except BaseException as exc:
         EXC_TYPE, _, EXC_TRACEBACK = sys.exc_info()
         FNAME = os.path.split(EXC_TRACEBACK.tb_frame.f_code.co_filename)[1]
