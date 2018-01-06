@@ -84,7 +84,7 @@ def get_ct_metrics(container_queue, containers_stats):
     logging.debug("Running get_ct_metrics()")
     while not container_queue.empty():
         container = container_queue.get()
-        logging.debug("Get container %s stats", container.id)
+        logging.debug("Get container %s stats", container.name)
         stats = get_ct_stats(container)
 
         mem_pct = get_mem_pct(stats)
@@ -92,15 +92,15 @@ def get_ct_metrics(container_queue, containers_stats):
         net_in, net_out = get_net_io(stats)
         disk_in, disk_out = get_disk_io(stats)
 
-        containers_stats['%s_mem_pct' % container.id] = mem_pct
-        containers_stats['%s_cpu_pct' % container.id] = cpu_pct
-        containers_stats['%s_net_in' % container.id] = net_in
-        containers_stats['%s_net_out' % container.id] = net_out
-        containers_stats['%s_disk_in' % container.id] = disk_in
-        containers_stats['%s_disk_out' % container.id] = disk_out
+        containers_stats['%s_mem_pct' % container.name] = mem_pct
+        containers_stats['%s_cpu_pct' % container.name] = cpu_pct
+        containers_stats['%s_net_in' % container.name] = net_in
+        containers_stats['%s_net_out' % container.name] = net_out
+        containers_stats['%s_disk_in' % container.name] = disk_in
+        containers_stats['%s_disk_out' % container.name] = disk_out
 
         container_queue.task_done()
-        logging.debug("Done with container %s stats", container.id)
+        logging.debug("Done with container %s stats", container.name)
     logging.debug("End get_ct_metrics()")
 
 
@@ -108,10 +108,7 @@ def get_ct_stats_message(containers_stats):
     '''Get check message from containers stats'''
     return ', '.join(
         [
-            "%s have %.2f%% %s" % (
-                k.split('_')[0][:12],
-                v,
-                k.split('_')[1])
+            "%s have %.2f%%" % (k, v)
             for k, v
             in containers_stats.items()
         ]
@@ -122,7 +119,7 @@ def get_ct_perfdata_message(containers_stats):
     '''Get perfdata message from containers stats'''
     return ' '.join(
         [
-            "%s_%s=%s" % (k[:12], "_".join(k.split("_")[1:3]), v)
+            "%s=%s" % (k, v)
             for k, v
             in containers_stats.items()
         ]
