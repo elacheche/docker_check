@@ -47,7 +47,12 @@ def get_cpu_pct(stats):
         stats['precpu_stats']['cpu_usage']['total_usage']
     system_delta = stats['cpu_stats']['system_cpu_usage'] - \
         stats['precpu_stats']['system_cpu_usage']
-    online_cpus = stats['cpu_stats']['online_cpus']
+    try:
+        online_cpus = stats['cpu_stats']['online_cpus']
+    except KeyError:
+        online_cpus = len([item
+                           for item in stats['cpu_stats']['percpu_usage']
+                           if item > 0])
     if cpu_delta > 0 and system_delta > 0:
         return (cpu_delta / system_delta) * online_cpus * 100
     return 0.0
