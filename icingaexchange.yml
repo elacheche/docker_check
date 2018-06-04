@@ -5,14 +5,14 @@ tags: Statistic, Contiainer, Icinga2, Nagios, Docker
 vendor: Linux
 target: Docker
 type: Plugin
-license: gpl
+license: GPL
 releases: 
   -
-   name: 1.0
-   description: "1.0 Release"
+   name: "2018-06-04"
+   description: "Rolling Release"
    files: 
      - 
        name: docker_check.py
        url: "file:///docker_check.py"
-       description: "First release"
-       checksum: c9c697f8d628c4d2e96047b61b8ac346
+       description: "Fix exit status codes bug #8"
+       checksum: 96d06dfb191d26d4d4bf054a6190698e
