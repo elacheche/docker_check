@@ -199,11 +199,6 @@ def main():
 if __name__ == '__main__':
     try:
         main()
-    except SystemExit:
-        pass
-    except BaseException as exc:
-        EXC_TYPE, _, EXC_TRACEBACK = sys.exc_info()
-        FNAME = os.path.split(EXC_TRACEBACK.tb_frame.f_code.co_filename)[1]
-        print("UNKNOWN: %s Exception \"%s\" in %s line %s" % (
-            EXC_TYPE.__name__, exc, FNAME, EXC_TRACEBACK.tb_lineno))
+    except Exception as e:
+        print(e)
         sys.exit(3)
