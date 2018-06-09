@@ -25,8 +25,8 @@ except ImportError as error:
     sys.exit(1)
 
 __author__ = 'El Acheche Anis'
-__license__ = 'GPL'
-__version__ = '0.1'
+__license__ = 'GPLv3'
+__version__ = '2018-06-04'
 
 
 def get_ct_stats(container):

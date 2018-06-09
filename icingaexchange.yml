@@ -5,7 +5,7 @@ tags: Statistic, Contiainer, Icinga2, Nagios, Docker
 vendor: Linux
 target: Docker
 type: Plugin
-license: GPL
+license: GPLv3
 releases: 
   -
    name: "2018-06-04"
