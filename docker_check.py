@@ -60,8 +60,15 @@ def get_cpu_pct(stats):
 
 def get_net_io(stats):
     '''Get a container Net In / Out usage since it's launche'''
-    net_in = stats['networks']['eth0']['rx_bytes']
-    net_out = stats['networks']['eth0']['tx_bytes']
+    try:
+        net_in = stats['networks']['eth0']['rx_bytes']
+    except KeyError:
+        net_in = 0
+    try:
+        net_out = stats['networks']['eth0']['tx_bytes']
+    except KeyError:
+        net_out = 0
+
     return net_in, net_out
 
 
