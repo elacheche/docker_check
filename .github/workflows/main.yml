@@ -1,0 +1,20 @@
+name: Upload asset
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Run a multi-line script
+      run: |
+        LATEST=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) ".tar.gz"}')
+        curl -Lso $LATEST https://github.com/elacheche/docker_check/archive/$LATEST
+        tar xzf $LATEST
+        FILE=$(ls docker_check*/docker_check.py)
+        UPLOAD_URL=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | awk '/upload_url/ {gsub("\"","");gsub(",","");gsub("{.*}","");print $2"?name=docker_check________.py"}')
+        curl -s -H "Authorization: token $UPLOAD_ASSETS" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE $UPLOAD_URL
