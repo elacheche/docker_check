@@ -12,6 +12,7 @@ jobs:
     steps:
     - name: Run a multi-line script
       run: |
+        echo "Starting"
         LATEST=$(curl -s -H "Authorization: token ${{ secrets.UPLOAD_ASSETS }}" https://api.github.com/repos/elacheche/docker_check/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) ".tar.gz"}')
         curl -Lso $LATEST https://github.com/elacheche/docker_check/archive/$LATEST
         tar xzf $LATEST
