@@ -16,5 +16,5 @@ jobs:
         curl -Lso $LATEST https://github.com/elacheche/docker_check/archive/$LATEST
         tar xzf $LATEST
         FILE=$(ls docker_check*/docker_check.py)
-        UPLOAD_URL=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | awk '/upload_url/ {gsub("\"","");gsub(",","");gsub("{.*}","");print $2"?name=docker_check________.py"}')
+        UPLOAD_URL=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | awk '/upload_url/ {gsub("\"","");gsub(",","");gsub("{.*}","");print $2"?name=docker_check.py"}')
         curl -s -H "Authorization: token ${{ secrets.UPLOAD_ASSETS }}" -H "Content-Type: $(file -b --mime-type $FILE)" --data-binary @$FILE $UPLOAD_URL
