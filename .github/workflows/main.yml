@@ -12,7 +12,7 @@ jobs:
     steps:
     - name: Run a multi-line script
       run: |
-        LATEST=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) ".tar.gz"}')
+        LATEST=$(curl -s -H "Authorization: token $UPLOAD_ASSETS" https://api.github.com/repos/elacheche/docker_check/releases/latest | grep "tag_name" | awk '{print substr($2, 2, length($2)-3) ".tar.gz"}')
         curl -Lso $LATEST https://github.com/elacheche/docker_check/archive/$LATEST
         tar xzf $LATEST
         FILE=$(ls docker_check*/docker_check.py)
