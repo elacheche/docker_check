@@ -11,10 +11,13 @@ pip3 install docker
 Please check this [link](https://github.com/docker/docker-py) To get more information about this lib please check
 
 ## Get the script to the right path in the Docker server:
+
 ```
-curl https://raw.githubusercontent.com/elacheche/docker_check/master/docker_check.py > /usr/lib/nagios/plugins/docker_check.py
+DOWNLOAD_URL=$(curl -s https://api.github.com/repos/elacheche/docker_check/releases/latest | awk '/browser_download_url/ {gsub("\"","");print $2}')
+curl -Lso /usr/lib/nagios/plugins/docker_check.py $DOWNLOAD_URL
 chmod +x /usr/lib/nagios/plugins/docker_check.py
 ```
+You can find the package on the [Icinga Exchange](https://exchange.icinga.com/elacheche/Docker%20containers%20check/releases) as well, where you can download the latest release.
 
 ## Add nagios user to docker group:
 ```
