@@ -26,7 +26,7 @@ except ImportError as error:
 
 __author__ = 'El Acheche Anis'
 __license__ = 'GPLv3'
-__version__ = '2018-06-04'
+__version__ = '2020-12-22'
 
 
 def get_ct_stats(container):
@@ -36,23 +36,41 @@ def get_ct_stats(container):
 
 def get_mem_pct(stats):
     '''Get a container memory usage in %'''
-    usage = stats['memory_stats']['usage']
-    limit = stats['memory_stats']['limit']
-    return round(usage * 100 / limit, 2)
+    try:
+        usage = stats['memory_stats']['usage']
+    except KeyError:
+        usage = 0
+    try:
+        limit = stats['memory_stats']['limit']
+    except KeyError:
+        limit = 0
+    try:
+        return round(usage * 100 / limit, 2)
+    except ZeroDivisionError:
+        return 0
 
 
 def get_cpu_pct(stats):
     '''Get a container cpu usage in %'''
-    cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - \
-        stats['precpu_stats']['cpu_usage']['total_usage']
-    system_delta = stats['cpu_stats']['system_cpu_usage'] - \
-        stats['precpu_stats']['system_cpu_usage']
+    try:
+        cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - \
+            stats['precpu_stats']['cpu_usage']['total_usage']
+    except KeyError:
+        cpu_delta = 0
+    try:
+        system_delta = stats['cpu_stats']['system_cpu_usage'] - \
+            stats['precpu_stats']['system_cpu_usage']
+    except KeyError:
+        system_delta = 0
     try:
         online_cpus = stats['cpu_stats']['online_cpus']
     except KeyError:
-        online_cpus = len([item
-                           for item in stats['cpu_stats']['percpu_usage']
-                           if item > 0])
+        try:
+            online_cpus = len([item
+                               for item in stats['cpu_stats']['percpu_usage']
+                               if item > 0])
+        except KeyError:
+            online_cpus = 0
     if cpu_delta > 0 and system_delta > 0:
         return (cpu_delta / system_delta) * online_cpus * 100
     return 0.0
@@ -68,7 +86,6 @@ def get_net_io(stats):
         net_out = stats['networks']['eth0']['tx_bytes']
     except KeyError:
         net_out = 0
-
     return net_in, net_out
 
 
@@ -79,9 +96,13 @@ def get_disk_io(stats):
         disk_in = disk[0]['value']
     except IndexError:
         disk_in = 0
+    except TypeError:
+        disk_in = 0
     try:
         disk_out = disk[1]['value']
     except IndexError:
+        disk_out = 0
+    except TypeError:
         disk_out = 0
     return disk_in, disk_out
 
