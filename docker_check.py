@@ -24,9 +24,10 @@ except ImportError as error:
           ''pip install docker' to do that".format(error))
     sys.exit(1)
 
-__author__ = 'El Acheche Anis'
+__author__ = 'El Acheche Anis aka elacheche'
+__contributors__ = ['Renato Covarrubias aka rnt', 'yulius-fxpal', 'Markus W. aka markwell-ch']
 __license__ = 'GPLv3'
-__version__ = '2020-12-22'
+__version__ = '2020-12-23'
 
 
 def get_ct_stats(container):
